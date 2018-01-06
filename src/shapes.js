@@ -1,6 +1,5 @@
-const Shapes = [
-  {
-    text: '0',
+const SHAPES = {
+  '0': {
     color: 'darkgrey',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -9,8 +8,8 @@ const Shapes = [
       [ true , false, true , ],
       [ true , true , true , ],
     ],
-  }, {
-    text: '1',
+  },
+  '1': {
     color: 'darkgoldenrod',
     footprint: { rows: 4, cols: 2 },
     footprint: [
@@ -19,8 +18,8 @@ const Shapes = [
       [ false, true, ],
       [ false, true, ],
     ],
-  }, {
-    text: '2',
+  },
+  '2': {
     color: 'darkorange',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -29,8 +28,8 @@ const Shapes = [
       [ true , true , false, ],
       [ true , true , true , ],
     ],
-  }, {
-    text: '3',
+  },
+  '3': {
     color: 'gold',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -39,8 +38,8 @@ const Shapes = [
       [ false, true , true , ],
       [ true , true , true , ],
     ],
-  }, {
-    text: '4',
+  },
+  '4': {
     color: 'darkgreen',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -49,8 +48,8 @@ const Shapes = [
       [ true , true , true , ],
       [ false, true , true , ],
     ],
-  }, {
-    text: '5',
+  },
+  '5': {
     color: 'turqouise',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -59,8 +58,8 @@ const Shapes = [
       [ false, false, true , ],
       [ true , true , true , ],
     ],
-  }, {
-    text: '6',
+  },
+  '6': {
     color: 'navy',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -69,8 +68,8 @@ const Shapes = [
       [ true , true , true , ],
       [ true , true , true , ],
     ],
-  }, {
-    text: '7',
+  },
+  '7': {
     color: 'mediumvioletred',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -79,8 +78,8 @@ const Shapes = [
       [ true , true , false, ],
       [ true , false, false, ],
     ],
-  }, {
-    text: '8',
+  },
+  '8': {
     color: 'salmon',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -89,8 +88,8 @@ const Shapes = [
       [ true , true , false, ],
       [ true , true , false, ],
     ],
-  }, {
-    text: '9',
+  },
+  '9': {
     color: 'red',
     footprint: { rows: 4, cols: 3 },
     squares: [
@@ -100,6 +99,8 @@ const Shapes = [
       [ true , true , false, ],
     ],
   },
-];
+};
 
-export default Shapes;
+
+
+export default SHAPES;
