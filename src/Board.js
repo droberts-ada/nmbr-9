@@ -1,48 +1,36 @@
 import React, { Component } from 'react';
 
-const Square = function(props) {
-  const inlineStyles = {
-    backgroundColor: props.color || 'black',
-  };
-  return (
-    <div className="square"
-      key={`square-${props.row}-${props.col}`}
-      onMouseEnter={(e) => props.setMouseLocation(props.row, props.col)}
-      style={inlineStyles}
-    />
-  );
-};
-
-const Row = function(props) {
-  let squares = [];
-  for (let c = 0; c < props.width; c++) {
-    squares.push(Square({
-      row: props.row,
-      col: c,
-      setMouseLocation: props.setMouseLocation,
-      color: props.board[props.row][c].color,
-    }));
-  }
-  return (
-    <div className="row" key={`row${props.row}`}>
-      { squares }
-    </div>
-  );
-}
-
 class Board extends Component {
+  square(r, c, color) {
+    const inlineStyles = {
+      backgroundColor: color || 'black',
+    };
+    return (
+      <div className="square"
+        key={`square-${r}-${c}`}
+        onMouseEnter={(e) => this.props.setMouseLocation(r, c)}
+        onClick={(e) => this.props.squareClick()}
+        style={inlineStyles}
+      />
+    );
+  }
 
+  row(r) {
+    let squares = [];
+    for (let c = 0; c < this.props.width; c++) {
+      squares.push(this.square(r, c, this.props.board[r][c].color));
+    }
+    return (
+      <div className="row" key={`row-${r}`}>
+      { squares }
+      </div>
+    );
+  }
 
   render() {
     let rows = [];
     for (let r = 0; r < this.props.height; r++) {
-      rows.push(Row({
-        row: r,
-        width: this.props.width,
-        setMouseLocation:
-        this.props.setMouseLocation,
-        board: this.props.board,
-      }));
+      rows.push(this.row(r));
     }
     return (
       <div className="board">

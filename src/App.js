@@ -31,8 +31,8 @@ class App extends Component {
     shapes.shuffle();
     const currentShape = shapes.pop();
 
-    const boardHeight = 12;
-    const boardWidth = 12;
+    const boardHeight = 20;
+    const boardWidth = 20;
     const board = Array(boardHeight).fill(Array(boardWidth).fill({color: 'black'}));
     this.state = {
       shapes: {
@@ -45,6 +45,39 @@ class App extends Component {
     }
   }
 
+  validPlay(row, col) {
+    return true;
+  }
+
+  squareClick() {
+    if (!this.state.shapes.current) {
+      return;
+    }
+    const anchor = this.getAnchor();
+    console.log(`User click at ${anchor.row}, ${anchor.col}`);
+    if (!this.validPlay(anchor.row, anchor.col)) {
+      return;
+    }
+
+    // Record some extra facts about the current shape and save it to played
+    const current = Object.assign({}, this.state.shapes.current);
+    current.anchor = anchor;
+
+
+    // Figure out the next shape
+    let newCurrent = null;
+    if (this.state.shapes.unplayed.length > 0) {
+      newCurrent = this.state.shapes.unplayed[0];
+    }
+    this.setState({
+      shapes: {
+        played: this.state.shapes.played.concat([current]),
+        current: newCurrent,
+        unplayed: this.state.shapes.unplayed.slice(1),
+      }
+    });
+  }
+
   setMouseLocation(row, col) {
     this.setState({
       mouse: {
@@ -54,7 +87,9 @@ class App extends Component {
     });
   }
 
-  anchorShape(shape, mouse) {
+  getAnchor() {
+    const shape = this.state.shapes.current;
+    const mouse = this.state.mouse;
     // Idea: mouse points at (1, 1) on the shape, anchor points at (0, 0)
     const anchor = {
       row: mouse.row - 1,
@@ -92,9 +127,9 @@ class App extends Component {
     }
 
     // Draw the ghost of the current piece
-    if (this.state.mouse) {
+    if (this.state.mouse && this.state.shapes.current) {
       const current = this.state.shapes.current;
-      const anchor = this.anchorShape(current, this.state.mouse);
+      const anchor = this.getAnchor();
       for (let r = 0; r < current.footprint.rows; r++) {
         for (let c = 0; c < current.footprint.cols; c++) {
           if (current.squares[r][c]) {
@@ -116,6 +151,7 @@ class App extends Component {
           height={this.state.boardHeight}
           board={board}
           setMouseLocation={this.setMouseLocation.bind(this)}
+          squareClick={this.squareClick.bind(this)}
         />
         <InfoBar
           shapes={this.state.shapes}
