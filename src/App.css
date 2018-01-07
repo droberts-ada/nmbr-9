@@ -1,4 +1,6 @@
 .board {
+  background-color: black;
+  display: inline-block;
 }
 
 .board .row {
@@ -12,5 +14,5 @@
   height: 30px;
   box-sizing: border-box;
 
-  
+
 }

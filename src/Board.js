@@ -6,7 +6,7 @@ class Board extends Component {
     switch(props.type) {
       case 'empty':
       Object.assign(inlineStyles, {
-        backgroundColor: props.color,
+        backgroundColor: 'white',
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: 'lightgrey',
@@ -14,11 +14,12 @@ class Board extends Component {
       break;
 
       case 'played':
-      inlineStyles['background'] = `radial-gradient(white, ${props.color})`;
+      inlineStyles['background'] = `radial-gradient(white, ${props.shape.color})`;
+      inlineStyles['opacity'] = props.opacity;
       break;
 
       case 'ghost':
-      inlineStyles['background'] = `radial-gradient(white, ${props.color})`;
+      inlineStyles['background'] = `radial-gradient(white, ${props.shape.color})`;
       break;
 
       default:

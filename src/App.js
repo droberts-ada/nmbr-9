@@ -286,21 +286,23 @@ class App extends Component {
     return anchor;
   }
 
+  drawShape(board, shape, anchor, type) {
+    for (let r = 0; r < shape.footprint.rows; r++) {
+      for (let c = 0; c < shape.footprint.cols; c++) {
+        if (shape.squares[r][c]) {
+          const square = board[anchor.row + r][anchor.col + c];
+          square.type = type;
+          square.shape = shape;
+        }
+      }
+    }
+  }
+
+  // Build the physical structure of the board: what squares are where,
+  // and what shape do they correspond to?
   buildBoard(drawGhost) {
     // TODO DPR: for perf, track board state and only update what's changed
 
-    const drawShape = (board, shape, anchor, type) => {
-      for (let r = 0; r < shape.footprint.rows; r++) {
-        for (let c = 0; c < shape.footprint.cols; c++) {
-          if (shape.squares[r][c]) {
-            const square = board[anchor.row + r][anchor.col + c];
-            square.color = shape.color;
-            square.type = type;
-            square.shape = shape;
-          }
-        }
-      }
-    };
 
     // Fill in the default (empty) board state
     const board = [];
@@ -308,7 +310,6 @@ class App extends Component {
       const row = [];
       for (let c = 0; c < this.state.boardWidth; c++) {
         row.push({
-          color: 'white',
           type: 'empty',
         });
       }
@@ -317,21 +318,27 @@ class App extends Component {
 
     // Draw all played pieces
     this.state.shapes.played.forEach((shape) => {
-      drawShape(board, shape, shape.anchor, 'played');
+      this.drawShape(board, shape, shape.anchor, 'played');
     });
-
-    // Draw the ghost of the current piece
-    if (drawGhost && this.state.mouse && this.state.shapes.current) {
-      const current = this.state.shapes.current;
-      const anchor = this.getAnchor();
-      drawShape(board, current, anchor, 'ghost');
-    }
 
     return board;
   }
 
+  // Take a board and augment it for rendering.
+  // Draw the ghost, figure out level lines, etc.
+  augmentBoard(board) {
+    if (!this.state.mouse || !this.state.shapes.current) {
+      return;
+    }
+
+    const current = this.state.shapes.current;
+    const anchor = this.getAnchor();
+    this.drawShape(board, current, anchor, 'ghost');
+  }
+
   render() {
     const board = this.buildBoard(true);
+    this.augmentBoard(board);
     return (
       <main>
         <Board
