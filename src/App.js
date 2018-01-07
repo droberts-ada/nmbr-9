@@ -62,6 +62,7 @@ class App extends Component {
     // Record some extra facts about the current shape and save it to played
     const current = Object.assign({}, this.state.shapes.current);
     current.anchor = anchor;
+    // TODO: level, rotation
 
 
     // Figure out the next shape
@@ -69,6 +70,8 @@ class App extends Component {
     if (this.state.shapes.unplayed.length > 0) {
       newCurrent = this.state.shapes.unplayed[0];
     }
+
+    // Update the state
     this.setState({
       shapes: {
         played: this.state.shapes.played.concat([current]),
@@ -111,6 +114,16 @@ class App extends Component {
     return anchor;
   }
 
+  drawShape(board, shape, anchor) {
+    for (let r = 0; r < shape.footprint.rows; r++) {
+      for (let c = 0; c < shape.footprint.cols; c++) {
+        if (shape.squares[r][c]) {
+          board[anchor.row + r][anchor.col + c].color = shape.color;
+        }
+      }
+    }
+  }
+
   buildBoard() {
     // TODO DPR: for perf, track board state and only update what's changed
 
@@ -126,17 +139,16 @@ class App extends Component {
       board.push(row);
     }
 
+    // Draw all played pieces
+    this.state.shapes.played.forEach((shape) => {
+      this.drawShape(board, shape, shape.anchor);
+    });
+
     // Draw the ghost of the current piece
     if (this.state.mouse && this.state.shapes.current) {
       const current = this.state.shapes.current;
       const anchor = this.getAnchor();
-      for (let r = 0; r < current.footprint.rows; r++) {
-        for (let c = 0; c < current.footprint.cols; c++) {
-          if (current.squares[r][c]) {
-            board[anchor.row + r][anchor.col + c].color = current.color;
-          }
-        }
-      }
+      this.drawShape(board, current, anchor);
     }
 
     return board;
