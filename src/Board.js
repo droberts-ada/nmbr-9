@@ -70,10 +70,158 @@ class Board {
 
   // Prepare for rendering by adding visual effects
   augment(mouse, ghost, ghostAnchor) {
+    const unAugmented = JSON.parse(JSON.stringify(this.squares))
+
     this.drawBoundaries();
+
+    // TODO: Level opacity, ghost validity
 
     // Draw the ghost
     this.drawShape(ghost, ghostAnchor, 'ghost');
+
+    // Restore the unaugmented version
+    const copy = this.squares;
+    this.squares = unAugmented;
+    return copy;
+  }
+
+  // -1 -> invalid placement
+  // non-negative -> what level it will live at
+  findLevel(current) {
+    let level = null;
+    const supports = new Set();
+
+    // Look at supporting tiles (level below)
+    for (let r = 0; r < current.footprint.rows; r++) {
+      const boardRow = r + current.anchor.row;
+      for (let c = 0; c < current.footprint.cols; c++) {
+        if (!current.squares[r][c]) {
+          continue;
+        }
+
+        const boardCol = c + current.anchor.col;
+        const playedShape = this.squares[boardRow][boardCol].shape;
+
+        if (level === null) {
+          // First square for this shape
+          if (playedShape) {
+            level = playedShape.level;
+          } else {
+            level = -1;
+          }
+
+        } else if (level !== playedShape.level) {
+          console.debug(`Level mismatch`);
+          return -1;
+
+        }
+
+        if (playedShape) {
+          supports.add(playedShape);
+        }
+      }
+    }
+
+    // The level we've recorded so far is the level of supporting shapes
+    // on the board. Our new shape will be one above that.
+    level += 1;
+
+    // Level 0 shapes can be unsupported, otherwise we need
+    // at least two unique support shapes.
+    // Does this check make sense here?
+    if (level !== 0 && supports.size < 2) {
+      console.debug('Not enough support shapes');
+      return -1;
+    }
+
+    return level;
+  }
+
+  checkAdjacent(current, level) {
+    // For each square on the new shape...
+    for (let r = 0; r < current.footprint.rows; r++) {
+      const boardRow = r + current.anchor.row;
+      for (let c = 0; c < current.footprint.cols; c++) {
+        if (!current.squares[r][c]) {
+          continue;
+        }
+
+        const boardCol = c + current.anchor.col;
+
+        // Look at all the adjacent squares in the board
+        // Since current has not been added to the board yet
+        // we don't need to worry about avoiding our own squares.
+        // If we've gotten this far we know any square that current
+        // occupies will be level-1 in board.
+        let found = false;
+        // Above
+        found = found || (
+          boardRow > 0 &&
+          this.squares[boardRow-1][boardCol].shape &&
+          this.squares[boardRow-1][boardCol].shape.level >= level
+        );
+
+        // Below
+        found = found || (
+          boardRow < this.height - 1 &&
+          this.squares[boardRow+1][boardCol].shape &&
+          this.squares[boardRow+1][boardCol].shape.level >= level
+        );
+
+        // Left
+        found = found || (
+          boardCol > 0 &&
+          this.squares[boardRow][boardCol-1].shape &&
+          this.squares[boardRow][boardCol-1].shape.level >= level
+        );
+
+        // Right
+        found = found || (
+          boardCol < this.width - 1 &&
+          this.squares[boardRow][boardCol+1].shape &&
+          this.squares[boardRow][boardCol+1].shape.level >= level
+        );
+
+        if (found) {
+          return true;
+        }
+      }
+    }
+
+    console.log(`No adjacent shape on this level`);
+    return false;
+  }
+
+  // Check whether a play is valid, and set the level
+  // at which it can be played.
+  // TODO: Figure out how to test this
+  checkPlay(current, played) {
+    // First play is always valid, and always on level 0
+    if (played.length === 0) {
+      current.level = 0;
+      return true;
+    }
+
+    // 3 rules for a valid play:
+    // - Each tile in the shape must be supported by the level below
+    // - A shape must be supported by two or more distinct shapes on
+    //   the lower level
+    // - If there's already a shape on this level, the current shape
+    //   must be adjacent to a shape on this level
+    const level = this.findLevel(current);
+    if (level === -1) {
+      return false;
+    }
+
+    // Look at adjacent tiles (same level)
+    // If one exists, our new shape must touch another shape on this level
+    if (played.some(s => s.level == level) &&
+        !this.checkAdjacent(current, level)) {
+      return false;
+    }
+
+    current.level = level;
+    return true;
   }
 }
 
