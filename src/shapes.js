@@ -50,7 +50,7 @@ const SHAPES = {
     ],
   },
   '5': {
-    color: 'turqouise',
+    color: 'turquoise',
     footprint: { rows: 4, cols: 3 },
     squares: [
       [ true , true , true , ],
