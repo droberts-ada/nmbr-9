@@ -1,10 +1,21 @@
 import React, { Component } from 'react';
 
 class Board extends Component {
-  square(r, c, color) {
-    const inlineStyles = {
-      backgroundColor: color || 'black',
-    };
+  square(r, c, props) {
+    const inlineStyles = {};
+    switch(props.type) {
+      case 'empty':
+      inlineStyles['backgroundColor'] = props.color;
+      break;
+
+      case 'played':
+      inlineStyles['background'] = `radial-gradient(white, ${props.color})`;
+      break;
+
+      case 'ghost':
+      inlineStyles['background'] = `radial-gradient(white, ${props.color})`;
+      break;
+    }
     return (
       <div className="square"
         key={`square-${r}-${c}`}
@@ -18,7 +29,7 @@ class Board extends Component {
   row(r) {
     let squares = [];
     for (let c = 0; c < this.props.width; c++) {
-      squares.push(this.square(r, c, this.props.board[r][c].color));
+      squares.push(this.square(r, c, this.props.board[r][c]));
     }
     return (
       <div className="row" key={`row-${r}`}>
