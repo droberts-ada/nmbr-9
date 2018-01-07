@@ -5,7 +5,12 @@ class Board extends Component {
     const inlineStyles = {};
     switch(props.type) {
       case 'empty':
-      inlineStyles['backgroundColor'] = props.color;
+      Object.assign(inlineStyles, {
+        backgroundColor: props.color,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'lightgrey',
+      });
       break;
 
       case 'played':
@@ -15,6 +20,9 @@ class Board extends Component {
       case 'ghost':
       inlineStyles['background'] = `radial-gradient(white, ${props.color})`;
       break;
+
+      default:
+      console.error(`Don't know how to render square of type ${props.type}`);
     }
     return (
       <div className="square"
@@ -44,7 +52,7 @@ class Board extends Component {
       rows.push(this.row(r));
     }
     return (
-      <div className="board">
+      <div className="board" onContextMenu={this.props.rotateShape}>
         { rows }
       </div>
     );

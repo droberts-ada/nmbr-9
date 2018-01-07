@@ -33,9 +33,7 @@ class App extends Component {
 
     const boardHeight = 20;
     const boardWidth = 20;
-    const board = Array(boardHeight).fill(
-      Array(boardWidth).fill({color: 'black'})
-    );
+
     this.state = {
       shapes: {
         current: currentShape,
@@ -93,7 +91,7 @@ class App extends Component {
           console.debug(`Level mismatch: ground to support`);
           return false;
 
-        } else if (level != -1 && (!playedShape || level != playedShape.level)) {
+        } else if (level !== -1 && (!playedShape || level !== playedShape.level)) {
           // Level mismatch, rule 1 above has been violated
           console.debug(`Level mismatch`);
           return false;
@@ -112,12 +110,13 @@ class App extends Component {
 
     // Level 0 shapes can be unsupported, otherwise we need
     // at least two unique support shapes.
-    if (level != 0 && supports.size < 2) {
+    if (level !== 0 && supports.size < 2) {
       console.log('Not enough support shapes');
       return false;
     }
 
-    // TODO: check that it's touching another shape on this level
+    // If one exists, our new shape must touch another shape on this level
+    
 
     current.level = level;
     return true;
@@ -152,6 +151,43 @@ class App extends Component {
         current: newCurrent,
         unplayed: this.state.shapes.unplayed.slice(1),
       }
+    });
+  }
+
+  rotateShape(event) {
+    // clockwise (spin-down)
+
+    // prevent the context menu from popping up
+    event.preventDefault();
+
+    // Create a copy to work with
+    const current = this.state.shapes.current;
+    const copy = {...current};
+
+    // Rotate the footprint
+    copy.footprint = {
+      rows: current.footprint.cols,
+      cols: current.footprint.rows,
+    }
+
+    // Copy over the squares themselves
+    copy.squares = [];
+    for (let c = 0; c < current.footprint.cols; c++) {
+      const row = []
+      for (let r = current.footprint.rows - 1; r >= 0; r--) {
+        row.push(current.squares[r][c]);
+      }
+      copy.squares.push(row);
+    }
+
+    console.debug('Rotated shape to:');
+    console.debug(copy);
+
+    this.setState({
+      shapes: {
+        ...this.state.shapes,
+        current: copy,
+      },
     });
   }
 
@@ -242,6 +278,7 @@ class App extends Component {
           board={board}
           setMouseLocation={this.setMouseLocation.bind(this)}
           squareClick={this.squareClick.bind(this)}
+          rotateShape={this.rotateShape.bind(this)}
           />
         <InfoBar
           shapes={this.state.shapes}
