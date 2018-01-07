@@ -54,16 +54,53 @@ class App extends Component {
     });
   }
 
+  anchorShape(shape, mouse) {
+    // Idea: mouse points at (1, 1) on the shape, anchor points at (0, 0)
+    const anchor = {
+      row: mouse.row - 1,
+      col: mouse.col - 1,
+    };
+
+    if (anchor.row < 0) {
+      anchor.row = 0;
+    } else if (anchor.row + shape.footprint.rows > this.state.boardHeight) {
+      anchor.row = this.state.boardHeight - shape.footprint.rows;
+    }
+
+    if (anchor.col < 0) {
+      anchor.col = 0;
+    } else if (anchor.col + shape.footprint.cols > this.state.boardWidth) {
+      anchor.col = this.state.boardWidth - shape.footprint.cols;
+    }
+
+    return anchor;
+  }
+
   buildBoard() {
     // Fill in the default (empty) board state
-    const board = Array(this.state.boardHeight).fill(
-      Array(this.state.boardWidth).fill({
-        color: 'black',
-      })
-    );
+    const board = [];
+    for (let r = 0; r < this.state.boardHeight; r++) {
+      const row = [];
+      for (let c = 0; c < this.state.boardWidth; c++) {
+        row.push({
+          color: 'white',
+        });
+      }
+      board.push(row);
+    }
 
     // Draw the ghost of the current piece
-    
+    if (this.state.mouse) {
+      const current = this.state.shapes.current;
+      const anchor = this.anchorShape(current, this.state.mouse);
+      for (let r = 0; r < current.footprint.rows; r++) {
+        for (let c = 0; c < current.footprint.cols; c++) {
+          if (current.squares[r][c]) {
+            board[anchor.row + r][anchor.col + c].color = current.color;
+          }
+        }
+      }
+    }
 
     return board;
   }

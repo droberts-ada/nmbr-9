@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 const Square = function(props) {
   const inlineStyles = {
-    borderColor: props.color || 'black',
+    backgroundColor: props.color || 'black',
   };
   return (
     <div className="square"
