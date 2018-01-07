@@ -47,6 +47,7 @@ class App extends Component {
 
   // Check whether a play is valid, and set the level
   // at which it can be played.
+  // TODO: Functional Decomposition
   // TODO: Figure out how to test this
   checkPlay(current) {
     // First play is always valid, and always on level 0
@@ -65,6 +66,7 @@ class App extends Component {
     let level = null;
     const supports = new Set();
 
+    // Look at supporting tiles (level below)
     for (let r = 0; r < current.footprint.rows; r++) {
       const boardRow = r + current.anchor.row;
       for (let c = 0; c < current.footprint.cols; c++) {
@@ -115,8 +117,68 @@ class App extends Component {
       return false;
     }
 
+    // Look at adjacent tiles (same level)
     // If one exists, our new shape must touch another shape on this level
-    
+    if (this.state.shapes.played.some(s => s.level == level)) {
+
+      // For each square on the new shape...
+      let found = false;
+      for (let r = 0; r < current.footprint.rows; r++) {
+        const boardRow = r + current.anchor.row;
+        for (let c = 0; c < current.footprint.cols; c++) {
+          if (!current.squares[r][c]) {
+            continue;
+          }
+
+          const boardCol = c + current.anchor.col;
+
+          // Look at all the adjacent squares in the board
+          // Since current has not been added to the board yet
+          // we don't need to worry about avoiding our own squares.
+          // If we've gotten this far we know any square that current
+          // occupies will be level-1 in board.
+          // Above
+          found = found || (
+            boardRow > 0 &&
+            board[boardRow-1][boardCol].shape &&
+            board[boardRow-1][boardCol].shape.level === level
+          );
+
+          // Below
+          found = found || (
+            boardRow < this.state.boardHeight - 1 &&
+            board[boardRow+1][boardCol].shape &&
+            board[boardRow+1][boardCol].shape.level === level
+          );
+
+          // Left
+          found = found || (
+            boardCol > 0 &&
+            board[boardRow][boardCol-1].shape &&
+            board[boardRow][boardCol-1].shape.level === level
+          );
+
+          // Right
+          found = found || (
+            boardCol < this.state.boardWidth - 1 &&
+            board[boardRow][boardCol+1].shape &&
+            board[boardRow][boardCol+1].shape.level === level
+          );
+
+          if (found) {
+            break;
+          }
+        }
+        if (found) {
+          break;
+        }
+      }
+
+      if (!found) {
+        console.log(`No adjacent shape on this level`);
+        return false;
+      }
+    }
 
     current.level = level;
     return true;
