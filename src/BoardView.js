@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 
 class BoardView extends Component {
+  DIRECTIONS = [
+    ['left', 'Left'],
+    ['right', 'Right'],
+    ['top', 'Top'],
+    ['bottom', 'Bottom'],
+  ]
   square(r, c, props) {
     const forEachDir = (fnWorker) => {
-      ['left', 'right', 'top', 'bottom'].forEach((low) => {
-        const cap = low.charAt(0).toUpperCase() + low.slice(1).toLowerCase();
-        fnWorker(low, cap);
+      this.DIRECTIONS.forEach((d) => {
+        fnWorker(d[0], d[1]);
       });
     };
 
@@ -14,7 +19,6 @@ class BoardView extends Component {
     // Type-specific styles
     switch(props.type) {
       case 'empty':
-      inlineStyles['backgroundColor'] = props.shape.color;
       forEachDir((low, cap) => {
         inlineStyles[`border${cap}Width`] = '1px';
         inlineStyles[`border${cap}Color`] = 'lightgrey';

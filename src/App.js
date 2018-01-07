@@ -63,7 +63,7 @@ class App extends Component {
       this.state.boardWidth,
       this.state.shapes.played
     );
-    if (!board.checkPlay(current, this.state.shapes.played)) {
+    if (!board.checkPlay(current)) {
       console.log('Play validation failed');
       return;
     }

@@ -2,6 +2,7 @@ class Board {
   constructor(height, width, playedShapes) {
     this.height = height;
     this.width = width;
+    this.playedShapes = playedShapes;
 
     // Fill in the default (empty) board state
 
@@ -68,13 +69,25 @@ class Board {
     }
   }
 
+  drawLevelOpacity() {
+    const maxLevel = Math.max(...this.playedShapes.map(s => s.level));
+    for (let r = 0; r < this.height; r++) {
+      for (let c = 0; c < this.width; c++) {
+        const square = this.squares[r][c];
+        square.opacity = 1.0 - (.1 * (maxLevel - square.shape.level));
+      }
+    }
+  }
+
   // Prepare for rendering by adding visual effects
   augment(mouse, ghost, ghostAnchor) {
     const unAugmented = JSON.parse(JSON.stringify(this.squares))
 
     this.drawBoundaries();
 
-    // TODO: Level opacity, ghost validity
+    this.drawLevelOpacity();
+
+    // TODO: ghost validity
 
     // Draw the ghost
     this.drawShape(ghost, ghostAnchor, 'ghost');
@@ -195,9 +208,9 @@ class Board {
   // Check whether a play is valid, and set the level
   // at which it can be played.
   // TODO: Figure out how to test this
-  checkPlay(current, played) {
+  checkPlay(current) {
     // First play is always valid, and always on level 0
-    if (played.length === 0) {
+    if (this.playedShapes.length === 0) {
       current.level = 0;
       return true;
     }
@@ -215,7 +228,7 @@ class Board {
 
     // Look at adjacent tiles (same level)
     // If one exists, our new shape must touch another shape on this level
-    if (played.some(s => s.level == level) &&
+    if (this.playedShapes.some(s => s.level == level) &&
         !this.checkAdjacent(current, level)) {
       return false;
     }
