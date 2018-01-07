@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import Board from './Board';
+// Components
+import BoardView from './BoardView';
 import InfoBar from './InfoBar';
 
+// Other modules
+import Board from './board';
 import SHAPES from './shapes.js';
 
 const getGameShapes = function(names) {
@@ -62,7 +65,12 @@ class App extends Component {
     //   the lower level
     // - If there's already a shape on this level, the current shape
     //   must be adjacent to a shape on this level
-    const board = this.buildBoard(false);
+    const board = new Board(
+      this.state.boardHeight,
+      this.state.boardWidth,
+      this.state.shapes.played
+    ).squares;
+
     let level = null;
     const supports = new Set();
 
@@ -89,11 +97,7 @@ class App extends Component {
             level = -1;
           }
 
-        } else if (level === -1 && playedShape) {
-          console.debug(`Level mismatch: ground to support`);
-          return false;
-
-        } else if (level !== -1 && (!playedShape || level !== playedShape.level)) {
+        } else if (level !== playedShape.level) {
           // Level mismatch, rule 1 above has been violated
           console.debug(`Level mismatch`);
           return false;
@@ -286,65 +290,27 @@ class App extends Component {
     return anchor;
   }
 
-  drawShape(board, shape, anchor, type) {
-    for (let r = 0; r < shape.footprint.rows; r++) {
-      for (let c = 0; c < shape.footprint.cols; c++) {
-        if (shape.squares[r][c]) {
-          const square = board[anchor.row + r][anchor.col + c];
-          square.type = type;
-          square.shape = shape;
-        }
-      }
-    }
-  }
-
-  // Build the physical structure of the board: what squares are where,
-  // and what shape do they correspond to?
-  buildBoard(drawGhost) {
-    // TODO DPR: for perf, track board state and only update what's changed
-
-
-    // Fill in the default (empty) board state
-    const board = [];
-    for (let r = 0; r < this.state.boardHeight; r++) {
-      const row = [];
-      for (let c = 0; c < this.state.boardWidth; c++) {
-        row.push({
-          type: 'empty',
-        });
-      }
-      board.push(row);
-    }
-
-    // Draw all played pieces
-    this.state.shapes.played.forEach((shape) => {
-      this.drawShape(board, shape, shape.anchor, 'played');
-    });
-
-    return board;
-  }
-
-  // Take a board and augment it for rendering.
-  // Draw the ghost, figure out level lines, etc.
-  augmentBoard(board) {
-    if (!this.state.mouse || !this.state.shapes.current) {
-      return;
-    }
-
-    const current = this.state.shapes.current;
-    const anchor = this.getAnchor();
-    this.drawShape(board, current, anchor, 'ghost');
-  }
-
   render() {
-    const board = this.buildBoard(true);
-    this.augmentBoard(board);
+    const board = new Board(
+      this.state.boardHeight,
+      this.state.boardWidth,
+      this.state.shapes.played
+    );
+
+    if (this.state.mouse && this.state.shapes.current) {
+      board.augment(
+        this.state.mouse,
+        this.state.shapes.current,
+        this.getAnchor()
+      );
+    }
+
     return (
       <main>
-        <Board
+        <BoardView
           width={this.state.boardWidth}
           height={this.state.boardHeight}
-          board={board}
+          board={board.squares}
           setMouseLocation={this.setMouseLocation.bind(this)}
           squareClick={this.squareClick.bind(this)}
           rotateShape={this.rotateShape.bind(this)}

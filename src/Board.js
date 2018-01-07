@@ -1,62 +1,79 @@
-import React, { Component } from 'react';
+class Board {
+  constructor(height, width, playedShapes) {
+    this.height = height;
+    this.width = width;
 
-class Board extends Component {
-  square(r, c, props) {
-    const inlineStyles = {};
-    switch(props.type) {
-      case 'empty':
-      Object.assign(inlineStyles, {
-        backgroundColor: 'white',
-        borderWidth: '1px',
-        borderStyle: 'solid',
-        borderColor: 'lightgrey',
-      });
-      break;
+    // Fill in the default (empty) board state
 
-      case 'played':
-      inlineStyles['background'] = `radial-gradient(white, ${props.shape.color})`;
-      inlineStyles['opacity'] = props.opacity;
-      break;
-
-      case 'ghost':
-      inlineStyles['background'] = `radial-gradient(white, ${props.shape.color})`;
-      break;
-
-      default:
-      console.error(`Don't know how to render square of type ${props.type}`);
+    // We'll use a fake shape for empty space to keep other code
+    // simple - it's safe to assume that every square has a shape
+    const emptySpace = {
+      color: 'white',
+      level: -1,
     }
-    return (
-      <div className="square"
-        key={`square-${r}-${c}`}
-        onMouseEnter={(e) => this.props.setMouseLocation(r, c)}
-        onClick={(e) => this.props.squareClick()}
-        style={inlineStyles}
-      />
-    );
+
+    this.squares = [];
+    for (let r = 0; r < height; r++) {
+      const row = [];
+      for (let c = 0; c < width; c++) {
+        row.push({
+          type: 'empty',
+          shape: emptySpace,
+        });
+      }
+      this.squares.push(row);
+    }
+
+    // Draw all played pieces
+    playedShapes.forEach((shape) => {
+      this.drawShape(shape, shape.anchor, 'played');
+    });
   }
 
-  row(r) {
-    let squares = [];
-    for (let c = 0; c < this.props.width; c++) {
-      squares.push(this.square(r, c, this.props.board[r][c]));
+  drawShape(shape, anchor, type) {
+    for (let r = 0; r < shape.footprint.rows; r++) {
+      for (let c = 0; c < shape.footprint.cols; c++) {
+        if (shape.squares[r][c]) {
+          this.squares[anchor.row + r][anchor.col + c] = {
+            type: type,
+            shape: shape,
+          };
+        }
+      }
     }
-    return (
-      <div className="row" key={`row-${r}`}>
-      { squares }
-      </div>
-    );
   }
 
-  render() {
-    let rows = [];
-    for (let r = 0; r < this.props.height; r++) {
-      rows.push(this.row(r));
+  // Borders between shapes on different levels
+  drawBoundaries() {
+    // left-right
+    for (let r = 0; r < this.height; r++) {
+      for (let c = 0; c < this.width - 1; c++) {
+        const lSquare = this.squares[r][c];
+        const rSquare = this.squares[r][c + 1];
+        const difference = Math.abs(lSquare.shape.level - rSquare.shape.level);
+        lSquare.borders = { ...lSquare.borders, right: difference };
+        rSquare.borders = { ...rSquare.borders, left: difference };
+      }
     }
-    return (
-      <div className="board" onContextMenu={this.props.rotateShape}>
-        { rows }
-      </div>
-    );
+
+    // Top-bottom
+    for (let c = 0; c < this.width; c++) {
+      for (let r = 0; r < this.height - 1; r++) {
+        const tSquare = this.squares[r][c];
+        const bSquare = this.squares[r + 1][c];
+        const difference = Math.abs(tSquare.shape.level - bSquare.shape.level);
+        tSquare.borders = { ...tSquare.borders, bottom: difference };
+        bSquare.borders = { ...bSquare.borders, top: difference };
+      }
+    }
+  }
+
+  // Prepare for rendering by adding visual effects
+  augment(mouse, ghost, ghostAnchor) {
+    this.drawBoundaries();
+
+    // Draw the ghost
+    this.drawShape(ghost, ghostAnchor, 'ghost');
   }
 }
 
