@@ -77,6 +77,8 @@ class App extends Component {
   }
 
   buildBoard() {
+    // TODO DPR: for perf, track board state and only update what's changed
+
     // Fill in the default (empty) board state
     const board = [];
     for (let r = 0; r < this.state.boardHeight; r++) {
