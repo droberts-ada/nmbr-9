@@ -4,25 +4,23 @@ import React, { Component } from 'react';
 
 
 class InfoBar extends Component {
-  mouseInfo() {
-    if (this.props.mouse) {
-      return (
-        <p>
-          Mouse:
-          row {this.props.mouse.row},
-          col {this.props.mouse.col},
-        </p>
-      );
-    } else {
-      return <p>Mouse: No Data</p>;
-    }
+  score() {
+    let score = 0;
+    this.props.shapes.played.forEach((shape) => {
+      score += shape.level * parseInt(shape.text);
+    });
+    return score;
   }
-  currentShapeInfo() {
+  shapeInfo() {
+    const played = this.props.shapes.played.map(s => s.text).join(', ');
+    const unplayed = this.props.shapes.unplayed.map(s => s.text).sort().join(', ');
     if (this.props.shapes.current) {
       return (
-        <p>
-          Current shape: {this.props.shapes.current.text}
-        </p>
+        <section>
+          <p>Played shapes: {played}</p>
+          <p>Current shape: {this.props.shapes.current.text}</p>
+          <p>Remaining shapes: {unplayed}</p>
+        </section>
       );
     } else {
       return <p>No current shape</p>;
@@ -34,8 +32,8 @@ class InfoBar extends Component {
         <h2>
           Game Info:
         </h2>
-        { this.mouseInfo() }
-        { this.currentShapeInfo() }
+        <p>Current Score: {this.score()}</p>
+        { this.shapeInfo() }
       </aside>
     );
   }
