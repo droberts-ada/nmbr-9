@@ -141,28 +141,28 @@ class App extends Component {
           found = found || (
             boardRow > 0 &&
             board[boardRow-1][boardCol].shape &&
-            board[boardRow-1][boardCol].shape.level === level
+            board[boardRow-1][boardCol].shape.level >= level
           );
 
           // Below
           found = found || (
             boardRow < this.state.boardHeight - 1 &&
             board[boardRow+1][boardCol].shape &&
-            board[boardRow+1][boardCol].shape.level === level
+            board[boardRow+1][boardCol].shape.level >= level
           );
 
           // Left
           found = found || (
             boardCol > 0 &&
             board[boardRow][boardCol-1].shape &&
-            board[boardRow][boardCol-1].shape.level === level
+            board[boardRow][boardCol-1].shape.level >= level
           );
 
           // Right
           found = found || (
             boardCol < this.state.boardWidth - 1 &&
             board[boardRow][boardCol+1].shape &&
-            board[boardRow][boardCol+1].shape.level === level
+            board[boardRow][boardCol+1].shape.level >= level
           );
 
           if (found) {
