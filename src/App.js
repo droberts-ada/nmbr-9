@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 import Board from './Board';
@@ -30,23 +29,59 @@ class App extends Component {
                    '5', '5', '6', '6', '7', '7', '8', '8', '9', '9',];
     const shapes = getGameShapes(tiles);
     shapes.shuffle();
+    const currentShape = shapes.pop();
 
     const boardHeight = 12;
     const boardWidth = 12;
-    const board = Array(boardHeight).fill(Array(boardWidth).fill({color: 'black'}))
+    const board = Array(boardHeight).fill(Array(boardWidth).fill({color: 'black'}));
     this.state = {
-      unplayedShapes: shapes,
-      playedShapes: [],
+      shapes: {
+        current: currentShape,
+        unplayed: shapes,
+        played: [],
+      },
       boardHeight: boardHeight,
       boardWidth: boardWidth,
-      board: board,
     }
   }
+
+  setMouseLocation(row, col) {
+    this.setState({
+      mouse: {
+        row: row,
+        col: col,
+      },
+    });
+  }
+
+  buildBoard() {
+    // Fill in the default (empty) board state
+    const board = Array(this.state.boardHeight).fill(
+      Array(this.state.boardWidth).fill({
+        color: 'black',
+      })
+    );
+
+    // Draw the ghost of the current piece
+    
+
+    return board;
+  }
+
   render() {
+    const board = this.buildBoard();
     return (
       <main>
-        <Board width={this.state.boardWidth} height={this.state.boardHeight} board={this.state.board} />
-        <InfoBar playedShapes={this.state.playedShapes} unplayedShapes={this.state.unplayedShapes} />
+        <Board
+          width={this.state.boardWidth}
+          height={this.state.boardHeight}
+          board={board}
+          setMouseLocation={this.setMouseLocation.bind(this)}
+        />
+        <InfoBar
+          shapes={this.state.shapes}
+          mouse={this.state.mouse}
+        />
       </main>
     );
   }

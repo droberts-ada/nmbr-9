@@ -12,7 +12,7 @@ const SHAPES = {
   '1': {
     color: 'darkgoldenrod',
     footprint: { rows: 4, cols: 2 },
-    footprint: [
+    squares: [
       [ true , true, ],
       [ false, true, ],
       [ false, true, ],
