@@ -8,13 +8,16 @@ class BoardView extends Component {
     ['bottom', 'Bottom'],
   ]
   square(r, c, props) {
+    // TODO: break this sucker out as a separate component
     const forEachDir = (fnWorker) => {
       this.DIRECTIONS.forEach((d) => {
         fnWorker(d[0], d[1]);
       });
     };
 
-    const inlineStyles = {};
+    const inlineStyles = {
+      opacity: props.opacity || 1,
+    };
 
     // Type-specific styles
     switch(props.type) {
@@ -28,7 +31,6 @@ class BoardView extends Component {
       case 'played':
       case 'ghost':
       inlineStyles['background'] = `radial-gradient(white, ${props.shape.color})`;
-      inlineStyles['opacity'] = props.opacity;
 
       break;
 
@@ -38,22 +40,34 @@ class BoardView extends Component {
 
     // Explicit borders apply to all squares and override defaults
     if (props.borders) {
-      forEachDir((low, cap) => {
-        if (props.borders[low] > 0) {
-          inlineStyles[`border${cap}Width`] = '1px';
-          inlineStyles[`border${cap}Color`] = props.borders.color || 'black';
-        }
-      });
+      Object.assign(inlineStyles, props.borders);
     }
 
-    return (
+    const key = `square-${r}-${c}`;
+
+    const result = (
       <div className="square"
-        key={`square-${r}-${c}`}
-        onMouseEnter={(e) => this.props.setMouseLocation(r, c)}
-        onClick={(e) => this.props.squareClick()}
-        style={inlineStyles}
+      key={key}
+      onMouseEnter={(e) => this.props.setMouseLocation(r, c)}
+      onClick={(e) => this.props.squareClick()}
+      style={inlineStyles}
       />
     );
+
+    if (props.overlay) {
+      const overlayStyles = {
+        zIndex: 100,
+        background: `radial-gradient(white, ${props.overlay.color})`,
+      };
+      return (
+        <div className="overlay" style={overlayStyles} key={key}>
+          {result}
+        </div>
+      );
+    } else {
+      return result;
+    }
+
   }
 
   row(r) {

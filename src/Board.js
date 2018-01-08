@@ -45,26 +45,55 @@ class Board {
   }
 
   // Borders between shapes on different levels
+  // Don't generate all those strings in an inner loop
   drawBoundaries() {
+    // TODO: white on the up-side, black on the down-side
+    const adjustBorders = (a, b, propNames) => {
+      if (a.shape === b.shape) {
+        return;
+      }
+
+      a.borders = a.borders || {};
+      b.borders = b.borders || {};
+
+      const difference = a.shape.level - b.shape.level;
+      if (difference === 0) {
+        a.borders[propNames[0]] = '1px';
+        a.borders[propNames[1]] = 'darkgrey';
+        b.borders[propNames[2]] = '1px';
+        b.borders[propNames[3]] = 'darkgrey';
+
+      } else {
+        a.borders[propNames[0]] = '2px';
+        b.borders[propNames[2]] = '2px';
+
+        if (difference < 0) {
+          a.borders[propNames[1]] = 'black';
+          b.borders[propNames[3]] = 'white';
+        } else if (difference > 0) {
+          a.borders[propNames[1]] = 'white';
+          b.borders[propNames[3]] = 'black';
+        }
+      }
+    };
+
     // left-right
+    let lrPropNames = ['borderRightWidth', 'borderRightColor', 'borderLeftWidth', 'borderLeftColor'];
     for (let r = 0; r < this.height; r++) {
       for (let c = 0; c < this.width - 1; c++) {
         const lSquare = this.squares[r][c];
         const rSquare = this.squares[r][c + 1];
-        const difference = Math.abs(lSquare.shape.level - rSquare.shape.level);
-        lSquare.borders = { ...lSquare.borders, right: difference };
-        rSquare.borders = { ...rSquare.borders, left: difference };
+        adjustBorders(lSquare, rSquare, lrPropNames);
       }
     }
 
     // Top-bottom
+    const tbPropNames = ['borderBottomWidth', 'borderBottomColor', 'borderTopWidth', 'borderTopColor'];
     for (let c = 0; c < this.width; c++) {
       for (let r = 0; r < this.height - 1; r++) {
         const tSquare = this.squares[r][c];
         const bSquare = this.squares[r + 1][c];
-        const difference = Math.abs(tSquare.shape.level - bSquare.shape.level);
-        tSquare.borders = { ...tSquare.borders, bottom: difference };
-        bSquare.borders = { ...bSquare.borders, top: difference };
+        adjustBorders(tSquare, bSquare, tbPropNames);
       }
     }
   }
@@ -74,13 +103,56 @@ class Board {
     for (let r = 0; r < this.height; r++) {
       for (let c = 0; c < this.width; c++) {
         const square = this.squares[r][c];
-        square.opacity = 1.0 - (.15 * (maxLevel - square.shape.level));
+        if (square.shape.level >= 0) {
+          square.opacity = 1.0 - (.15 * (maxLevel - square.shape.level));
+        }
+      }
+    }
+  }
+
+  drawGhost(current, anchor) {
+
+    // TODO it shows up, but this is very hard to see.
+    current.anchor = anchor;
+    // TODO don't do this here
+    const isValid = this.checkPlay(current);
+    const ghostBorder = (square, dir) => {
+      square.borders = square.borders || {};
+      square.borders[`border${dir}Width`] = '2px';
+      square.borders[`border${dir}Color`] = isValid ? 'lightgreen' : 'red';
+    }
+
+    for (let r = 0; r < current.footprint.rows; r++) {
+      for (let c = 0; c < current.footprint.cols; c++) {
+        // Ghost overlay
+        if (current.squares[r][c]) {
+          const square = this.squares[anchor.row + r][anchor.col + c];
+          square.overlay = {
+            color: current.color,
+          }
+          square.opacity = square.opacity ? square.opacity * 0.3 : 0.3;
+
+          // Green or red border based on validity (?)
+          if (!current.squares[r-1] || !current.squares[r-1][c]) {
+            ghostBorder(square, 'Top');
+          }
+          if (!current.squares[r+1] || !current.squares[r+1][c]) {
+            ghostBorder(square, 'Bottom');
+          }
+          if (!current.squares[r][c-1]) {
+            ghostBorder(square, 'Left');
+          }
+          if (!current.squares[r][c+1]) {
+            ghostBorder(square, 'Right');
+          }
+        }
+
       }
     }
   }
 
   // Prepare for rendering by adding visual effects
-  augment(mouse, ghost, ghostAnchor) {
+  augment(mouse, current, currentAnchor) {
     const unAugmented = JSON.parse(JSON.stringify(this.squares))
 
     this.drawBoundaries();
@@ -90,7 +162,7 @@ class Board {
     // TODO: ghost validity
 
     // Draw the ghost
-    this.drawShape(ghost, ghostAnchor, 'ghost');
+    this.drawGhost(current, currentAnchor);
 
     // Restore the unaugmented version
     const copy = this.squares;

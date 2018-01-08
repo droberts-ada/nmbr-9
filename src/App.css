@@ -1,5 +1,5 @@
 .board {
-  background-color: black;
+  background-color: darkslategrey;
   display: inline-block;
 }
 
@@ -18,4 +18,10 @@
   border-width: 0px;
 
   background-color: white;
+}
+
+.board .overlay {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
 }
